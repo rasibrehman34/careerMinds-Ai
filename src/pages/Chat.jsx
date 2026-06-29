@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
 import ChatInput from '../components/chat/ChatInput'
@@ -6,24 +7,54 @@ import EmptyState from '../components/chat/EmptyState'
 import ScrollToBottomButton from '../components/chat/ScrollToBottomButton'
 import { useAuth } from '../hooks/useAuth'
 import { sendCareerQuestion, generateConversationTitle, generateRoadmapTitle, generateComparisonTitle } from '../services/geminiService'
-import { createChatHistory, updateChatMessages } from '../services/chatHistoryService'
+import { createConversation, addMessage, getMessages } from '../services/chatHistoryService'
 import { saveRoadmap, saveComparison } from '../services/roadmapService'
 
 export default function Chat() {
   const { user } = useAuth()
+  const { id } = useParams()
+  const navigate = useNavigate()
+  
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
-  const [chatId, setChatId] = useState(null)
+  const [chatId, setChatId] = useState(id || null)
   const [savedRoadmapIds, setSavedRoadmapIds] = useState([])
   const [savedComparisonIds, setSavedComparisonIds] = useState([])
   const [saveToast, setSaveToast] = useState(null)
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
 
   const containerRef = useRef(null)
   const messagesEndRef = useRef(null)
 
   const hasMessages = messages.length > 0
+
+  // Load chat history if ID is present
+  useEffect(() => {
+    async function loadChat() {
+      if (id && user) {
+        setIsLoadingHistory(true)
+        const { data } = await getMessages(id)
+        if (data) {
+          // Format messages from DB to match UI expectation
+          const formattedMessages = data.map(m => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            createdAt: m.created_at
+          }))
+          setMessages(formattedMessages)
+          setChatId(id)
+        }
+        setIsLoadingHistory(false)
+      } else if (!id) {
+        setMessages([])
+        setChatId(null)
+      }
+    }
+    loadChat()
+  }, [id, user])
 
   const scrollToBottom = useCallback((behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior })
@@ -51,6 +82,31 @@ export default function Chat() {
     setInput('')
     setIsTyping(true)
 
+    let currentChatId = chatId
+
+    // Save user message to Supabase if authenticated
+    if (user) {
+      try {
+        if (!currentChatId) {
+          const titleResponse = await generateConversationTitle(trimmed)
+          const title = titleResponse.success ? titleResponse.message : 'New Career Chat'
+          const result = await createConversation(user.id, title)
+          if (result.data) {
+            currentChatId = result.data.id
+            setChatId(currentChatId)
+            // Save user message to the new conversation
+            await addMessage(currentChatId, 'user', trimmed)
+            // Update URL without reloading page
+            navigate(`/chat/${currentChatId}`, { replace: true })
+          }
+        } else {
+          await addMessage(currentChatId, 'user', trimmed)
+        }
+      } catch (err) {
+        console.error('Failed to save user message:', err)
+      }
+    }
+
     // Prepare conversation context (last 10 messages for context window)
     const contextLimit = updatedMessages.slice(-10)
     const context = contextLimit
@@ -75,21 +131,12 @@ export default function Chat() {
     setMessages(finalMessages)
     setIsTyping(false)
 
-    // Save to Supabase if authenticated
-    if (user) {
+    // Save AI response to Supabase if authenticated
+    if (user && currentChatId) {
       try {
-        if (!chatId) {
-          const titleResponse = await generateConversationTitle(trimmed)
-          const title = titleResponse.success ? titleResponse.message : 'New Career Chat'
-          const result = await createChatHistory(user.id, title, finalMessages)
-          if (result.data) {
-            setChatId(result.data.id)
-          }
-        } else {
-          await updateChatMessages(chatId, finalMessages)
-        }
+        await addMessage(currentChatId, 'assistant', aiMessage.content)
       } catch (err) {
-        console.error('Failed to save chat history:', err)
+        console.error('Failed to save AI response:', err)
       }
     }
   }
@@ -104,7 +151,6 @@ export default function Chat() {
     if (savedRoadmapIds.includes(message.id)) return
 
     try {
-      // Auto-generate a clean title using Gemini
       const titleResponse = await generateRoadmapTitle(message.roadmapTitle || 'Career Roadmap')
       const title = titleResponse.success ? titleResponse.message : 'Career Roadmap'
 
@@ -154,6 +200,7 @@ export default function Chat() {
     setShowScrollButton(false)
     setSavedRoadmapIds([])
     setSavedComparisonIds([])
+    navigate('/chat')
   }
 
   function handleSelectQuestion(question) {
@@ -188,8 +235,18 @@ export default function Chat() {
     <section className="flex min-h-[calc(100dvh-4.5rem)] flex-1 flex-col bg-stone-50 dark:bg-zinc-950">
       <ChatHeader onNewChat={handleNewChat} />
 
+      {!user && (
+        <div className="bg-blue-50 py-2 text-center text-sm font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+          Sign in to save your conversation history.
+        </div>
+      )}
+
       <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden">
-        {hasMessages ? (
+        {isLoadingHistory ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100"></div>
+          </div>
+        ) : hasMessages ? (
           <ChatMessages
             messages={messages}
             isTyping={isTyping}
@@ -213,7 +270,7 @@ export default function Chat() {
           value={input}
           onChange={setInput}
           onSend={handleSend}
-          disabled={isTyping}
+          disabled={isTyping || isLoadingHistory}
         />
       </div>
 

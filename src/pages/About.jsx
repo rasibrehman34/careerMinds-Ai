@@ -6,7 +6,7 @@ const highlights = [
   {
     icon: '🎯',
     title: 'Built for students',
-    description: 'StudentAI focuses on clear answers, study help, and a simple user experience.',
+    description: 'CareerMinds AI focuses on clear answers, study help, and a simple user experience.',
   },
   {
     icon: '⚛️',
@@ -24,13 +24,13 @@ export default function About() {
   return (
     <PageLayout>
       <PageHeader
-        title="About StudentAI"
+        title="About CareerMinds AI"
         description="We help students learn with an approachable AI chat experience and a clean, theme-aware interface."
       />
 
       <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-8">
         <p className="text-base leading-relaxed text-slate-700 dark:text-slate-200">
-          StudentAI is a learning companion designed to make studying less overwhelming.
+          CareerMinds AI is a learning companion designed to make studying less overwhelming.
           Sign up, start a chat, and get help with concepts, revision, and homework-style questions.
         </p>
         <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">

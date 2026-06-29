@@ -4,6 +4,7 @@ create table chat_history (
   user_id uuid references auth.users on delete cascade not null,
   title text not null default 'New Conversation',
   first_message text,
+  messages jsonb default '[]'::jsonb not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

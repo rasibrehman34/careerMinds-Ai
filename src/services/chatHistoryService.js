@@ -1,36 +1,65 @@
 import { supabase } from '../supabase/supabaseClient'
 
 /**
- * Fetch chat history for a specific user.
- * @param {string} userId - The UUID of the user.
- * @param {number} limit - Maximum number of records to fetch.
- * @returns {Promise<{ data: array | null, error: object | null }>}
+ * Fetch chat history (conversations) for a specific user, including a preview of the last message and message count.
  */
 export async function getChatHistory(userId, limit = 50) {
   if (!userId) return { data: null, error: { message: 'User ID is required' } }
 
   const { data, error } = await supabase
-    .from('chat_history')
-    .select('*')
+    .from('conversations')
+    .select(`
+      id,
+      title,
+      created_at,
+      updated_at,
+      messages ( id, content, created_at )
+    `)
     .eq('user_id', userId)
     .order('updated_at', { ascending: false })
     .limit(limit)
+
+  if (error) return { data: null, error }
+
+  // Format to provide message count and preview
+  const formattedData = data.map(conv => {
+    // sort messages for this conversation by created_at desc
+    const sortedMessages = (conv.messages || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const lastMessage = sortedMessages.length > 0 ? sortedMessages[0].content : '';
+    return {
+      id: conv.id,
+      title: conv.title,
+      created_at: conv.created_at,
+      updated_at: conv.updated_at,
+      message_count: conv.messages ? conv.messages.length : 0,
+      first_message: lastMessage // reuse this key for preview purposes
+    }
+  })
+
+  return { data: formattedData, error: null }
+}
+
+/**
+ * Fetch all messages for a specific conversation.
+ */
+export async function getMessages(conversationId) {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: true })
 
   return { data, error }
 }
 
 /**
- * Create a new chat session for a user.
- * @param {string} userId - The UUID of the user.
- * @param {string} title - The title of the chat.
- * @param {Array} messages - Initial messages.
- * @returns {Promise<{ data: object | null, error: object | null }>}
+ * Create a new conversation for a user.
  */
-export async function createChatHistory(userId, title, messages = []) {
+export async function createConversation(userId, title) {
   const { data, error } = await supabase
-    .from('chat_history')
+    .from('conversations')
     .insert([
-      { user_id: userId, title, messages }
+      { user_id: userId, title }
     ])
     .select()
     .single()
@@ -39,31 +68,34 @@ export async function createChatHistory(userId, title, messages = []) {
 }
 
 /**
- * Append messages to an existing chat history record.
- * @param {string} chatId - The UUID of the chat.
- * @param {Array} newMessages - The messages array.
- * @returns {Promise<{ data: object | null, error: object | null }>}
+ * Add a message to a conversation.
  */
-export async function updateChatMessages(chatId, newMessages) {
+export async function addMessage(conversationId, role, content) {
   const { data, error } = await supabase
-    .from('chat_history')
-    .update({ messages: newMessages, updated_at: new Date().toISOString() })
-    .eq('id', chatId)
+    .from('messages')
+    .insert([
+      { conversation_id: conversationId, role, content }
+    ])
     .select()
     .single()
+
+  // Update conversation's updated_at
+  if (!error) {
+    await supabase
+      .from('conversations')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', conversationId)
+  }
 
   return { data, error }
 }
 
 /**
- * Update a chat's title.
- * @param {string} chatId - The UUID of the chat.
- * @param {string} newTitle - The new title.
- * @returns {Promise<{ data: object | null, error: object | null }>}
+ * Update a conversation's title.
  */
 export async function updateChatTitle(chatId, newTitle) {
   const { data, error } = await supabase
-    .from('chat_history')
+    .from('conversations')
     .update({ title: newTitle, updated_at: new Date().toISOString() })
     .eq('id', chatId)
     .select()
@@ -73,13 +105,11 @@ export async function updateChatTitle(chatId, newTitle) {
 }
 
 /**
- * Delete a chat history record.
- * @param {string} chatId - The UUID of the chat.
- * @returns {Promise<{ error: object | null }>}
+ * Delete a conversation.
  */
 export async function deleteChatHistory(chatId) {
   const { error } = await supabase
-    .from('chat_history')
+    .from('conversations')
     .delete()
     .eq('id', chatId)
 

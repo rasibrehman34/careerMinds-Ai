@@ -123,9 +123,15 @@ export default function HistoryCard({ chat, onDelete, onRename }) {
       </Link>
       
       <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800/60">
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">
-          {dateStr}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+            {dateStr}
+          </span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">&bull;</span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+            {chat.message_count} {chat.message_count === 1 ? 'message' : 'messages'}
+          </span>
+        </div>
         <Link 
           to={`/chat/${chat.id}`}
           className="flex items-center text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 group-hover:underline"

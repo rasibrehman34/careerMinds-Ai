@@ -22,7 +22,7 @@ import { isAuthRoute, isProtectedRoute } from './utils/protectedRoute'
 
 function AppContent() {
   const location = useLocation()
-  const isChatPage = location.pathname === '/chat'
+  const isChatPage = location.pathname === '/chat' || location.pathname.startsWith('/chat/')
   const isAuthPage = isAuthRoute(location.pathname)
   const isProtected = isProtectedRoute(location.pathname)
 
@@ -34,6 +34,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:id" element={<Chat />} />
           <Route
             path="/login"
             element={
