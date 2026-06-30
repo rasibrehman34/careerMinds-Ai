@@ -21,7 +21,7 @@ export default function RecentActivity() {
           const formatted = data.map(chat => ({
             id: chat.id,
             title: chat.title,
-            description: chat.first_message ? `started with "${chat.first_message.substring(0, 30)}..."` : 'started a new conversation.',
+            description: chat.last_message ? `started with "${chat.last_message.substring(0, 30)}..."` : 'started a new conversation.',
             date: new Date(chat.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
             href: `/chat/${chat.id}`
           }))

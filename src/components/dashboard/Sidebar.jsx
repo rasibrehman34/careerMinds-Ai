@@ -5,6 +5,7 @@ import {
   History,
   Bookmark,
   BarChart2,
+  BrainCircuit,
   User,
   Settings,
   LogOut,
@@ -23,6 +24,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     { name: 'Chat History', path: '/chat-history', icon: History },
     { name: 'Saved Careers', path: '/saved-careers', icon: Bookmark },
     { name: 'Saved Comparisons', path: '/saved-comparisons', icon: BarChart2 },
+    { name: 'Skill Gap', path: '/skill-gap', icon: BrainCircuit },
   ]
 
   const bottomItems = [

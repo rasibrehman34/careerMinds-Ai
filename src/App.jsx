@@ -18,6 +18,7 @@ import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import ChatHistory from './pages/ChatHistory'
 import SavedCareers from './pages/SavedCareers'
+import SkillGap from './pages/SkillGap'
 import { isAuthRoute, isProtectedRoute } from './utils/protectedRoute'
 
 function AppContent() {
@@ -63,6 +64,7 @@ function AppContent() {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/chat-history" element={<ProtectedRoute><ChatHistory /></ProtectedRoute>} />
           <Route path="/saved-careers" element={<ProtectedRoute><SavedCareers /></ProtectedRoute>} />
+          <Route path="/skill-gap" element={<SkillGap />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         </Routes>

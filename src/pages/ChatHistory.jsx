@@ -44,7 +44,7 @@ export default function ChatHistory() {
       result = result.filter(
         chat => 
           chat.title.toLowerCase().includes(query) || 
-          (chat.first_message && chat.first_message.toLowerCase().includes(query))
+          (chat.last_message && chat.last_message.toLowerCase().includes(query))
       )
     }
 

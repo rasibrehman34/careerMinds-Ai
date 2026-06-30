@@ -91,24 +91,32 @@ export default function Chat() {
           const titleResponse = await generateConversationTitle(trimmed)
           const title = titleResponse.success ? titleResponse.message : 'New Career Chat'
           const result = await createConversation(user.id, title)
-          if (result.data) {
+          if (result.error) {
+            console.error('Failed to create conversation:', result.error)
+          } else if (result.data) {
             currentChatId = result.data.id
             setChatId(currentChatId)
             // Save user message to the new conversation
-            await addMessage(currentChatId, 'user', trimmed)
+            const msgResult = await addMessage(currentChatId, 'user', trimmed)
+            if (msgResult.error) {
+              console.error('Failed to save initial user message:', msgResult.error)
+            }
             // Update URL without reloading page
             navigate(`/chat/${currentChatId}`, { replace: true })
           }
         } else {
-          await addMessage(currentChatId, 'user', trimmed)
+          const msgResult = await addMessage(currentChatId, 'user', trimmed)
+          if (msgResult.error) {
+            console.error('Failed to save user message:', msgResult.error)
+          }
         }
       } catch (err) {
-        console.error('Failed to save user message:', err)
+        console.error('Unexpected error saving user message:', err)
       }
     }
 
     // Prepare conversation context (last 10 messages for context window)
-    const contextLimit = updatedMessages.slice(-10)
+    const contextLimit = messages.slice(-10)
     const context = contextLimit
       .map(m => `${m.role === 'user' ? 'User' : 'Advisor'}: ${m.content}`)
       .join('\n')
@@ -134,9 +142,12 @@ export default function Chat() {
     // Save AI response to Supabase if authenticated
     if (user && currentChatId) {
       try {
-        await addMessage(currentChatId, 'assistant', aiMessage.content)
+        const aiMsgResult = await addMessage(currentChatId, 'assistant', aiMessage.content)
+        if (aiMsgResult.error) {
+          console.error('Failed to save AI response:', aiMsgResult.error)
+        }
       } catch (err) {
-        console.error('Failed to save AI response:', err)
+        console.error('Unexpected error saving AI response:', err)
       }
     }
   }

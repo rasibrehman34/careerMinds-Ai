@@ -116,7 +116,7 @@ export default function HistoryCard({ chat, onDelete, onRename }) {
             )}
             
             <p className="mt-1 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400 min-h-[2.5rem]">
-              {chat.first_message || "Empty conversation"}
+              {chat.last_message || "Start your first conversation"}
             </p>
           </div>
         </div>
