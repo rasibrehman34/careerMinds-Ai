@@ -1,5 +1,6 @@
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import ProfileCard from '../components/dashboard/ProfileCard'
+import CareerProfileCard from '../components/dashboard/CareerProfileCard'
 
 export default function Profile() {
   return (
@@ -15,6 +16,7 @@ export default function Profile() {
         </div>
 
         <ProfileCard />
+        <CareerProfileCard />
       </div>
     </DashboardLayout>
   )

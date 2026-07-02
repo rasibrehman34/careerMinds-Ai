@@ -27,14 +27,12 @@ export default function Signup() {
   const [form, setForm] = useState(initialForm)
   const [fieldErrors, setFieldErrors] = useState({})
   const [formError, setFormError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }))
     setFieldErrors((current) => ({ ...current, [name]: '' }))
     setFormError('')
-    setSuccessMessage('')
   }
 
   async function handleSubmit(event) {
@@ -47,7 +45,6 @@ export default function Signup() {
 
     setLoading(true)
     setFormError('')
-    setSuccessMessage('')
 
     const { data, error } = await signUp({
       email: form.email,
@@ -62,18 +59,12 @@ export default function Signup() {
       return
     }
 
-    if (data.session) {
-      navigate(DEFAULT_LOGIN_REDIRECT, { replace: true })
-      return
-    }
-
-    setSuccessMessage('Check your email to confirm your account, then log in.')
+    navigate(DEFAULT_LOGIN_REDIRECT, { replace: true })
   }
 
   async function handleGoogleSignUp() {
     setLoading(true)
     setFormError('')
-    setSuccessMessage('')
 
     const { error } = await signInWithGoogle()
 
@@ -92,7 +83,6 @@ export default function Signup() {
       >
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <AuthAlert type="error" message={formError} />
-          <AuthAlert type="success" message={successMessage} />
 
           <AuthInput
             id="fullName"

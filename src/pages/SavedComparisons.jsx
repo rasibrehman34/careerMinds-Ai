@@ -21,20 +21,21 @@ export default function SavedComparisons() {
   const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
-    if (!user) return
-    fetchComparisons()
-  }, [user])
-
-  async function fetchComparisons() {
-    setLoading(true)
-    const { data, error } = await getSavedComparisons(user.id)
-    if (error) {
-      setError('Failed to load saved comparisons.')
-    } else {
-      setComparisons(data || [])
+    async function fetchComparisons() {
+      setLoading(true)
+      const { data, error } = await getSavedComparisons(user?.id)
+      if (error) {
+        setError('Failed to load saved comparisons.')
+      } else {
+        setComparisons(data || [])
+      }
+      setLoading(false)
     }
-    setLoading(false)
-  }
+
+    if (user) {
+      fetchComparisons()
+    }
+  }, [user])
 
   async function handleDelete(id) {
     if (!window.confirm('Delete this comparison? This cannot be undone.')) return

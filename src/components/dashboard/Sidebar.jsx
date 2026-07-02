@@ -23,7 +23,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     { name: 'AI Chat', path: '/chat', icon: MessageSquare },
     { name: 'Chat History', path: '/chat-history', icon: History },
     { name: 'Saved Careers', path: '/saved-careers', icon: Bookmark },
-    { name: 'Saved Comparisons', path: '/saved-comparisons', icon: BarChart2 },
+    { name: 'Saved Comparisons', path: '/dashboard/saved-comparisons', icon: BarChart2 },
     { name: 'Skill Gap', path: '/skill-gap', icon: BrainCircuit },
   ]
 
@@ -44,9 +44,8 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
 
       {/* Sidebar Content */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform flex-col justify-between border-r border-zinc-200 bg-white transition-transform duration-300 ease-in-out dark:border-zinc-800 dark:bg-zinc-950 lg:static lg:flex lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } flex`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform flex-col justify-between border-r border-zinc-200 bg-white transition-transform duration-300 ease-in-out dark:border-zinc-800 dark:bg-zinc-950 lg:static lg:flex lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } flex`}
       >
         <div>
           <div className="flex h-16 items-center justify-between px-6 border-b border-zinc-200 dark:border-zinc-800">
@@ -70,11 +69,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
                       ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                       : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-50'
-                  }`}
+                    }`}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />
                   {item.name}
@@ -92,11 +90,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
                       ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                       : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-50'
-                  }`}
+                    }`}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />
                   {item.name}

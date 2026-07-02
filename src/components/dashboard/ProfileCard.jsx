@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getProfile, updateProfile } from '../../services/profileService'
+import { getProfile, updateProfile, uploadAvatar } from '../../services/profileService'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function ProfileCard() {
@@ -7,6 +7,8 @@ export default function ProfileCard() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState('')
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -26,6 +28,7 @@ export default function ProfileCard() {
             avatar_url: data.avatar_url || '',
             bio: data.bio || '',
           })
+          setAvatarPreview(data.avatar_url || '')
         }
         setLoading(false)
       }
@@ -39,12 +42,37 @@ export default function ProfileCard() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      setAvatarFile(file)
+      setAvatarPreview(URL.createObjectURL(file))
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
     setMessage({ type: '', text: '' })
 
-    const { error } = await updateProfile(user.id, formData)
+    let finalAvatarUrl = formData.avatar_url
+
+    if (avatarFile) {
+      const { url, error: uploadError } = await uploadAvatar(user.id, avatarFile)
+      if (uploadError) {
+        setMessage({ type: 'error', text: 'Failed to upload image. Please try again.' })
+        setSaving(false)
+        return
+      }
+      finalAvatarUrl = url
+    }
+
+    const updates = {
+      ...formData,
+      avatar_url: finalAvatarUrl
+    }
+
+    const { error } = await updateProfile(user.id, updates)
 
     if (error) {
       setMessage({ type: 'error', text: 'Failed to update profile.' })
@@ -101,24 +129,23 @@ export default function ProfileCard() {
 
           <div className="sm:col-span-2">
             <label htmlFor="avatar_url" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Profile Picture URL
+              Profile Picture
             </label>
             <div className="mt-1">
               <input
-                type="url"
-                name="avatar_url"
+                type="file"
+                name="avatar_file"
                 id="avatar_url"
-                value={formData.avatar_url}
-                onChange={handleChange}
-                placeholder="https://example.com/avatar.jpg"
-                className="block w-full rounded-md border border-zinc-300 px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="block w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-zinc-800 dark:file:text-zinc-300 dark:hover:file:bg-zinc-700"
               />
             </div>
-            {formData.avatar_url && (
+            {avatarPreview && (
               <div className="mt-4 flex items-center gap-4">
                 <span className="text-sm text-zinc-500 dark:text-zinc-400">Preview:</span>
                 <img 
-                  src={formData.avatar_url} 
+                  src={avatarPreview} 
                   alt="Avatar preview" 
                   className="h-12 w-12 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
                   onError={(e) => {

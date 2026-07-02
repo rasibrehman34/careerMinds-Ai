@@ -6,9 +6,11 @@ import StatsCard from '../components/dashboard/StatsCard'
 import QuickActions from '../components/dashboard/QuickActions'
 import RecentActivity from '../components/dashboard/RecentActivity'
 import CareerGoals from '../components/dashboard/CareerGoals'
+import CareerSnapshot from '../components/dashboard/CareerSnapshot'
 import AIRecommendation from '../components/dashboard/AIRecommendation'
 import RecentSkillGapReports from '../components/dashboard/RecentSkillGapReports'
 import { useAuth } from '../hooks/useAuth'
+import { getCareerProfile } from '../services/careerProfileService'
 import { getChatHistory } from '../services/chatHistoryService'
 import { getSavedRoadmaps, getSavedComparisons } from '../services/roadmapService'
 
@@ -22,6 +24,7 @@ export default function Dashboard() {
     lastActive: 'No activity yet',
   })
   const [recentTitles, setRecentTitles] = useState([])
+  const [careerProfile, setCareerProfile] = useState(null)
   const [loadingStats, setLoadingStats] = useState(true)
 
   useEffect(() => {
@@ -29,16 +32,18 @@ export default function Dashboard() {
 
     async function fetchDashboardStats() {
       setLoadingStats(true)
-      // Fetch all three in parallel for performance
-      const [convResult, roadmapResult, compResult] = await Promise.all([
+      // Fetch all in parallel for performance
+      const [convResult, roadmapResult, compResult, profileResult] = await Promise.all([
         getChatHistory(user.id, 100),
         getSavedRoadmaps(user.id),
         getSavedComparisons(user.id),
+        getCareerProfile(user.id)
       ])
 
       const conversations = convResult.data || []
       const roadmaps = roadmapResult.data || []
       const comparisons = compResult.data || []
+      setCareerProfile(profileResult.data || null)
 
       // Determine last active date from most recent conversation
       let lastActive = 'No activity yet'
@@ -128,14 +133,15 @@ export default function Dashboard() {
           <QuickActions />
         </div>
 
-        {/* Recent Conversations + Career Goals (side by side on large screens) */}
+        {/* Snapshot & Goals */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <RecentActivity />
+          <CareerSnapshot profile={careerProfile} loading={loadingStats} />
           <CareerGoals />
         </div>
 
-        {/* Skill Gap Reports */}
+        {/* Recent Conversations */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <RecentActivity />
           <RecentSkillGapReports />
         </div>
 

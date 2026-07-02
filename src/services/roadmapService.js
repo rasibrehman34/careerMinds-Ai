@@ -3,7 +3,9 @@ import { supabase } from '../supabase/supabaseClient'
 /**
  * Roadmap Service
  * Handles all Supabase operations for saved career roadmaps and degree comparisons.
- * Both feature types share the same `saved_roadmaps` table, differentiated by a `type` column.
+ * NOTE: Both feature types share the same `saved_roadmaps` table.
+ * If you want to separate roadmaps from comparisons, add a `type` text column to the
+ * `saved_roadmaps` table in Supabase and re-enable the .eq('type', ...) filters below.
  */
 
 /**
@@ -18,7 +20,6 @@ export async function getSavedRoadmaps(userId) {
     .from('saved_roadmaps')
     .select('*')
     .eq('user_id', userId)
-    .eq('type', 'roadmap')
     .order('created_at', { ascending: false })
 
   return { data, error }
@@ -36,7 +37,7 @@ export async function saveRoadmap(userId, title, content) {
 
   const { data, error } = await supabase
     .from('saved_roadmaps')
-    .insert([{ user_id: userId, title, content, type: 'roadmap' }])
+    .insert([{ user_id: userId, title, content }])
     .select()
     .single()
 
@@ -59,6 +60,8 @@ export async function deleteRoadmap(roadmapId) {
 
 /**
  * Fetch all saved degree comparisons for a user.
+ * Currently fetches the same table as roadmaps.
+ * To differentiate, add a `type` column to `saved_roadmaps` in Supabase.
  * @param {string} userId - The UUID of the authenticated user.
  * @returns {Promise<{ data: Array | null, error: object | null }>}
  */
@@ -69,7 +72,6 @@ export async function getSavedComparisons(userId) {
     .from('saved_roadmaps')
     .select('*')
     .eq('user_id', userId)
-    .eq('type', 'comparison')
     .order('created_at', { ascending: false })
 
   return { data, error }
@@ -87,9 +89,10 @@ export async function saveComparison(userId, title, content) {
 
   const { data, error } = await supabase
     .from('saved_roadmaps')
-    .insert([{ user_id: userId, title, content, type: 'comparison' }])
+    .insert([{ user_id: userId, title, content }])
     .select()
     .single()
 
   return { data, error }
 }
+

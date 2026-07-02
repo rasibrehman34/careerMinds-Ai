@@ -21,20 +21,21 @@ export default function SavedCareers() {
   const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
-    if (!user) return
-    fetchRoadmaps()
-  }, [user])
-
-  async function fetchRoadmaps() {
-    setLoading(true)
-    const { data, error } = await getSavedRoadmaps(user.id)
-    if (error) {
-      setError('Failed to load saved roadmaps.')
-    } else {
-      setRoadmaps(data || [])
+    async function fetchRoadmaps() {
+      setLoading(true)
+      const { data, error } = await getSavedRoadmaps(user?.id)
+      if (error) {
+        setError('Failed to load saved roadmaps.')
+      } else {
+        setRoadmaps(data || [])
+      }
+      setLoading(false)
     }
-    setLoading(false)
-  }
+
+    if (user) {
+      fetchRoadmaps()
+    }
+  }, [user])
 
   async function handleDelete(id) {
     if (!window.confirm('Delete this roadmap? This cannot be undone.')) return

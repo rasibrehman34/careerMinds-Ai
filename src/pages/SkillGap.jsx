@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { BrainCircuit, Loader, Save, ChevronDown, ChevronUp, AlertCircle, CheckCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { BrainCircuit, Loader, Save, ChevronDown, ChevronUp, AlertCircle, CheckCircle, Clock, Trash2 } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import { useAuth } from '../hooks/useAuth'
 import { generateSkillGapAnalysis } from '../services/geminiService'
-import { saveReport } from '../services/skillGapService'
+import { saveReport, getReports, getReportById, deleteReport } from '../services/skillGapService'
 
 const EDUCATION_OPTIONS = ['', 'High School / Matric', 'Intermediate / FSc', "Bachelor's Degree", "Master's Degree", 'Self-Taught / Bootcamp', 'Other']
 const EXPERIENCE_OPTIONS = ['', 'No Experience (Complete Beginner)', 'Less than 1 Year', '1–2 Years', '3–5 Years', '5+ Years']
@@ -64,6 +65,7 @@ function CollapsibleReport({ content }) {
 
 export default function SkillGap() {
   const { user } = useAuth()
+  const location = useLocation()
 
   // Form state
   const [career, setCareer] = useState('')
@@ -79,9 +81,77 @@ export default function SkillGap() {
   const [saved, setSaved] = useState(false)
   const [toast, setToast] = useState(null)
 
+  // Saved reports
+  const [savedReports, setSavedReports] = useState([])
+  const [reportsLoading, setReportsLoading] = useState(false)
+  const [selectedReport, setSelectedReport] = useState(null)
+  const [reportLoading, setReportLoading] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+
   function showToast(text, type = 'success') {
     setToast({ text, type })
     setTimeout(() => setToast(null), 3500)
+  }
+
+  // Fetch saved reports list
+  async function fetchSavedReports() {
+    if (!user?.id) return
+    setReportsLoading(true)
+    const { data } = await getReports(user.id)
+    if (data) setSavedReports(data)
+    setReportsLoading(false)
+  }
+
+  useEffect(() => {
+    fetchSavedReports()
+  }, [user])
+
+  // Auto-load report if navigated here with a reportId in location state
+  useEffect(() => {
+    const reportId = location.state?.reportId
+    if (reportId && user?.id) {
+      handleLoadReport(reportId)
+    }
+  }, [location.state, user])
+
+  async function handleLoadReport(reportId) {
+    setReportLoading(true)
+    setReport(null)
+    setSaved(true)
+    setSelectedReport(reportId)
+    const { data, error: fetchError } = await getReportById(reportId)
+    if (fetchError || !data) {
+      showToast('Failed to load report.', 'error')
+    } else {
+      setCareer(data.career || '')
+      setSkills(data.current_skills || '')
+      setReport(data.analysis)
+    }
+    setReportLoading(false)
+    // Scroll to report area
+    setTimeout(() => {
+      document.getElementById('report-output')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 200)
+  }
+
+  async function handleDeleteReport(reportId, e) {
+    e.stopPropagation()
+    setDeletingId(reportId)
+    const { error: delError } = await deleteReport(reportId)
+    if (delError) {
+      showToast('Failed to delete report.', 'error')
+    } else {
+      showToast('Report deleted.')
+      setSavedReports(prev => prev.filter(r => r.id !== reportId))
+      if (selectedReport === reportId) {
+        setSelectedReport(null)
+        setReport(null)
+        setCareer('')
+        setSkills('')
+        setSaved(false)
+      }
+    }
+    setDeletingId(null)
   }
 
   async function handleGenerate(e) {
@@ -97,6 +167,7 @@ export default function SkillGap() {
     setError(null)
     setReport(null)
     setSaved(false)
+    setSelectedReport(null)
     setLoading(true)
 
     const result = await generateSkillGapAnalysis(trimmedCareer, trimmedSkills, education, experience)
@@ -120,6 +191,8 @@ export default function SkillGap() {
     } else {
       setSaved(true)
       showToast('Report saved successfully!')
+      // Refresh the saved reports list
+      fetchSavedReports()
     }
     setSaving(false)
   }
@@ -261,21 +334,91 @@ export default function SkillGap() {
           </div>
         </form>
 
-        {/* Loading state */}
-        {loading && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-10 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <Loader className="mx-auto h-8 w-8 animate-spin text-violet-500" />
-            <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-              CareerMind AI is analysing your skill gaps…
-            </p>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              This may take up to 30 seconds.
-            </p>
+        {/* Saved Reports List */}
+        {user && (
+          <div className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+              <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Your Saved Reports</h2>
+              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Click any report to view its full analysis.</p>
+            </div>
+            {reportsLoading ? (
+              <div className="p-6">
+                <div className="space-y-3 animate-pulse">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+                  ))}
+                </div>
+              </div>
+            ) : savedReports.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 p-8 text-center">
+                <BrainCircuit className="h-8 w-8 text-zinc-300 dark:text-zinc-600" />
+                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">No saved reports yet</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">Generate and save an analysis above to see it here.</p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {savedReports.map(r => (
+                  <li key={r.id}>
+                    <button
+                      onClick={() => handleLoadReport(r.id)}
+                      className={`group w-full flex items-center gap-3 px-6 py-3.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${
+                        selectedReport === r.id ? 'bg-violet-50 dark:bg-violet-900/10' : ''
+                      }`}
+                    >
+                      <div className="flex-shrink-0 rounded-md bg-violet-50 p-1.5 text-violet-500 dark:bg-violet-900/20 dark:text-violet-400">
+                        <BrainCircuit className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className={`truncate text-sm font-medium ${
+                          selectedReport === r.id
+                            ? 'text-violet-700 dark:text-violet-300'
+                            : 'text-zinc-900 dark:text-zinc-100'
+                        }`}>
+                          {r.career}
+                        </p>
+                        <p className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                          <Clock className="h-3 w-3" />
+                          {new Date(r.created_at).toLocaleDateString(undefined, {
+                            month: 'short', day: 'numeric', year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => handleDeleteReport(r.id, e)}
+                        disabled={deletingId === r.id}
+                        aria-label="Delete report"
+                        className="ml-1 flex-shrink-0 rounded p-1 text-zinc-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400 disabled:opacity-50"
+                      >
+                        {deletingId === r.id
+                          ? <Loader className="h-3.5 w-3.5 animate-spin" />
+                          : <Trash2 className="h-3.5 w-3.5" />}
+                      </button>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
-        {/* Generated Report */}
-        {report && !loading && (
+        {/* Loading state */}
+        {(loading || reportLoading) && (
+          <div id="report-output" className="rounded-xl border border-zinc-200 bg-white p-10 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <Loader className="mx-auto h-8 w-8 animate-spin text-violet-500" />
+            <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+              {reportLoading ? 'Loading your saved report…' : 'CareerMind AI is analysing your skill gaps…'}
+            </p>
+            {loading && (
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+                This may take up to 30 seconds.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Generated / Loaded Report */}
+        <div id="report-output" />
+        {report && !loading && !reportLoading && (
           <div className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             {/* Report Header */}
             <div className="flex flex-col gap-3 border-b border-zinc-100 p-6 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">

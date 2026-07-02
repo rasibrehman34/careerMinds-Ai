@@ -8,6 +8,8 @@ export default function ChatMessages({
   containerRef,
   onSaveRoadmap,
   onSaveComparison,
+  onSaveProfile,
+  onDismissProfile,
   savedRoadmapIds = [],
   savedComparisonIds = [],
 }) {
@@ -25,6 +27,8 @@ export default function ChatMessages({
           message={message}
           onSaveRoadmap={onSaveRoadmap}
           onSaveComparison={onSaveComparison}
+          onSaveProfile={onSaveProfile}
+          onDismissProfile={onDismissProfile}
           isSaved={
             savedRoadmapIds.includes(message.id) ||
             savedComparisonIds.includes(message.id)

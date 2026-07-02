@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth'
 import { sendCareerQuestion, generateConversationTitle, generateRoadmapTitle, generateComparisonTitle } from '../services/geminiService'
 import { createConversation, addMessage, getMessages } from '../services/chatHistoryService'
 import { saveRoadmap, saveComparison } from '../services/roadmapService'
+import { getCareerProfile, upsertCareerProfile } from '../services/careerProfileService'
 
 export default function Chat() {
   const { user } = useAuth()
@@ -24,6 +25,7 @@ export default function Chat() {
   const [savedComparisonIds, setSavedComparisonIds] = useState([])
   const [saveToast, setSaveToast] = useState(null)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [careerProfile, setCareerProfile] = useState(null)
 
   const containerRef = useRef(null)
   const messagesEndRef = useRef(null)
@@ -33,6 +35,11 @@ export default function Chat() {
   // Load chat history if ID is present
   useEffect(() => {
     async function loadChat() {
+      if (user) {
+        const { data: profileData } = await getCareerProfile(user.id)
+        setCareerProfile(profileData || null)
+      }
+      
       if (id && user) {
         setIsLoadingHistory(true)
         const { data } = await getMessages(id)
@@ -122,7 +129,7 @@ export default function Chat() {
       .join('\n')
 
     // Call Gemini Service
-    const response = await sendCareerQuestion(trimmed, context)
+    const response = await sendCareerQuestion(trimmed, context, careerProfile)
 
     const aiMessage = {
       id: crypto.randomUUID(),
@@ -150,6 +157,43 @@ export default function Chat() {
         console.error('Unexpected error saving AI response:', err)
       }
     }
+  }
+
+  async function handleSaveProfile(proposal, messageId) {
+    if (!user) {
+      showNotification('Please sign in to update your profile.', 'error')
+      return
+    }
+    try {
+      const field = proposal.field
+      const value = proposal.value
+      const currentProfile = careerProfile || {}
+      let updatedProfile = { ...currentProfile }
+      
+      if (Array.isArray(updatedProfile[field])) {
+        if (!updatedProfile[field].includes(value)) {
+          updatedProfile[field] = [...updatedProfile[field], value]
+        }
+      } else {
+        updatedProfile[field] = value
+      }
+
+      const { data, error } = await upsertCareerProfile(user.id, updatedProfile)
+      if (error) throw error
+      
+      setCareerProfile(data)
+      showNotification('Career Profile updated successfully!')
+      
+      // Update message to hide buttons
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, profileProposalHandled: true } : m))
+    } catch (err) {
+      console.error('Failed to update profile:', err)
+      showNotification('Failed to update profile.', 'error')
+    }
+  }
+
+  function handleDismissProfile(messageId) {
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, profileProposalHandled: true } : m))
   }
 
   // Handle saving a roadmap message to Supabase
@@ -265,6 +309,8 @@ export default function Chat() {
             messagesEndRef={messagesEndRef}
             onSaveRoadmap={handleSaveRoadmap}
             onSaveComparison={handleSaveComparison}
+            onSaveProfile={handleSaveProfile}
+            onDismissProfile={handleDismissProfile}
             savedRoadmapIds={savedRoadmapIds}
             savedComparisonIds={savedComparisonIds}
           />

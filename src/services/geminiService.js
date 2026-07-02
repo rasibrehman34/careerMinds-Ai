@@ -199,7 +199,7 @@ export const isComparisonRequest = (text) => {
  * @param {string} context - Optional context (e.g., previous chat history or user profile data).
  * @returns {Promise<Object>}
  */
-export const sendCareerQuestion = async (question, context = '') => {
+export const sendCareerQuestion = async (question, context = '', userProfile = null) => {
   const isRoadmap = isRoadmapRequest(question);
   const isComparison = !isRoadmap && isComparisonRequest(question);
 
@@ -227,6 +227,17 @@ CONVERSATION MEMORY & CONTEXT:
 - Keep answers concise by default. Only provide detailed responses when explicitly requested.
 - If context is insufficient to answer a follow-up, refer to the CLARIFICATION RULES and ask a concise clarification question.`;
 
+  const profileRules = `
+AI PROFILE ASSISTANT (CRITICAL):
+- You will be provided with the user's current 'Career Profile' if available.
+- Use this profile context naturally to personalize your advice, but DO NOT repeat the profile back to them or expose the raw data.
+- Detect if the user reveals new career data in their question (e.g., "I started learning React", "My goal is AI Engineer").
+- If they reveal new information that is NOT already in their profile, DO NOT save it automatically.
+- Instead, output a special markdown block asking for their permission to save it to their profile.
+- You MUST use this exact format on a new line at the end of your response:
+  [PROFILE_PROPOSAL]{"field": "current_learning", "value": "React", "message": "I noticed you're learning React. Would you like me to add it to your Career Profile?"}[/PROFILE_PROPOSAL]
+- Valid fields are: "education", "career_goal", "current_skills", "interests", "preferred_work", "current_learning".`;
+
   if (isRoadmap) {
     systemInstruction = `You are a professional AI Career Counselor and Tech Industry Advisor.
 The user is requesting a full career roadmap. Generate a comprehensive, beginner-friendly roadmap using EXACTLY these numbered sections in markdown:
@@ -253,7 +264,8 @@ RULES:
 - DO NOT invent fake statistics.
 - Mention when salaries or market conditions vary by country.
 ${clarificationRules}
-${memoryRules}`;
+${memoryRules}
+${profileRules}`;
   } else if (isComparison) {
     systemInstruction = `You are a professional AI Career Counselor and Tech Industry Advisor specializing in degree and career comparisons.
 The user is asking for a structured comparison. Generate a comprehensive, beginner-friendly comparison using EXACTLY these sections in markdown:
@@ -280,7 +292,8 @@ RULES:
 - Mention when salaries or market conditions vary by country or region.
 - End with a clear, actionable Final Recommendation.
 ${clarificationRules}
-${memoryRules}`;
+${memoryRules}
+${profileRules}`;
   } else {
     systemInstruction = `You are a professional AI Career Counselor and Tech Industry Advisor.
 Your primary specialization covers: Career Guidance, Degree Selection, University Advice, Skills Roadmaps, Programming Languages, Software Development, AI & Machine Learning, Cyber Security, Cloud Computing, Data Science, UI/UX Design, Freelancing, Remote Jobs, Resume Writing, Interview Preparation, Salary Insights, Future Industry Trends, and Career Switching.
@@ -312,12 +325,25 @@ QUALITY RULES:
 - Explain concepts in beginner-friendly language.
 - DO NOT invent facts or fake statistics.
 ${clarificationRules}
-${memoryRules}`;
+${memoryRules}
+${profileRules}`;
   }
 
-  const prompt = context
-    ? `Conversation History (for context):\n${context}\n\nUser Question:\n${question}`
-    : `User Question:\n${question}`;
+  let profileContextStr = '';
+  if (userProfile) {
+    profileContextStr = `User Career Profile Context:\n`;
+    if (userProfile.education) profileContextStr += `- Education: ${userProfile.education}\n`;
+    if (userProfile.degree) profileContextStr += `- Degree: ${userProfile.degree}\n`;
+    if (userProfile.semester) profileContextStr += `- Semester: ${userProfile.semester}\n`;
+    if (userProfile.career_goal) profileContextStr += `- Goal: ${userProfile.career_goal}\n`;
+    if (userProfile.current_skills?.length) profileContextStr += `- Skills: ${userProfile.current_skills.join(', ')}\n`;
+    if (userProfile.current_learning?.length) profileContextStr += `- Current Learning: ${userProfile.current_learning.join(', ')}\n`;
+    if (userProfile.interests?.length) profileContextStr += `- Interests: ${userProfile.interests.join(', ')}\n`;
+    if (userProfile.preferred_work?.length) profileContextStr += `- Preferred Work: ${userProfile.preferred_work.join(', ')}\n`;
+    profileContextStr += '\n';
+  }
+
+  const prompt = `${profileContextStr}${context ? `Conversation History (for context):\n${context}\n\n` : ''}User Question:\n${question}`;
 
   const result = await callGeminiAPI(prompt, systemInstruction);
 

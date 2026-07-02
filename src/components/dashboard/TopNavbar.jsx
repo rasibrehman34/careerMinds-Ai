@@ -4,11 +4,11 @@ import { useAuth } from '../../hooks/useAuth'
 
 export default function TopNavbar({ toggleSidebar }) {
   const { user } = useAuth()
-  
+
   // Try to get a display name or avatar from metadata
   const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture
-  
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-zinc-200 bg-white/80 px-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80 sm:px-6">
       <div className="flex items-center gap-4">
@@ -22,11 +22,7 @@ export default function TopNavbar({ toggleSidebar }) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="relative rounded-full p-2 text-zinc-500 hover:bg-zinc-100 focus:outline-none dark:text-zinc-400 dark:hover:bg-zinc-800">
-          <span className="sr-only">View notifications</span>
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-zinc-950" />
-        </button>
+
 
         <ThemeToggle />
 

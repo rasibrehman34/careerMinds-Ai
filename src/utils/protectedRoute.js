@@ -17,7 +17,7 @@ export const PROTECTED_ROUTES = [
   '/settings',
   '/chat-history',
   '/saved-careers',
-  '/saved-comparisons',
+  '/dashboard/saved-comparisons',
   '/skill-gap',
 ]
 

@@ -68,6 +68,7 @@ export default function RecentSkillGapReports() {
             <li key={report.id}>
               <Link
                 to="/skill-gap"
+                state={{ reportId: report.id }}
                 className="group flex items-center gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 transition-colors hover:border-zinc-200 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
               >
                 <div className="flex-shrink-0 rounded-md bg-violet-50 p-1.5 text-violet-500 dark:bg-violet-900/20 dark:text-violet-400">

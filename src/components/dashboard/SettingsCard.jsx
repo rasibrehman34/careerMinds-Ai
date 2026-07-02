@@ -30,7 +30,7 @@ export default function SettingsCard() {
       </div>
 
       {/* Notification Settings (Placeholder) */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      {/* <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-6">
           Notifications
         </h2>
@@ -72,7 +72,7 @@ export default function SettingsCard() {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Danger Zone */}
       <div className="rounded-xl border border-red-200 bg-red-50 p-6 dark:border-red-900/50 dark:bg-red-900/10">
