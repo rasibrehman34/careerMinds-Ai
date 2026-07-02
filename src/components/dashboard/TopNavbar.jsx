@@ -1,4 +1,5 @@
-import { Menu, Bell } from 'lucide-react'
+import { Menu } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import ThemeToggle from '../ThemeToggle'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -32,7 +33,11 @@ export default function TopNavbar({ toggleSidebar }) {
               {fullName}
             </span>
           </div>
-          <div className="h-8 w-8 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+          <Link
+            to="/profile"
+            title="Go to profile"
+            className="h-8 w-8 overflow-hidden rounded-full bg-zinc-200 ring-2 ring-transparent transition-all hover:ring-blue-500 dark:bg-zinc-800"
+          >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -44,7 +49,7 @@ export default function TopNavbar({ toggleSidebar }) {
                 {fullName.charAt(0).toUpperCase()}
               </div>
             )}
-          </div>
+          </Link>
         </div>
       </div>
     </header>

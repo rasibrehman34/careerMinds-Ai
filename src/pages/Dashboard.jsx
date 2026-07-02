@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, Bookmark, GitCompareArrows, CalendarDays } from 'lucide-react'
+import { MessageSquare, Bookmark, BrainCircuit, CalendarDays } from 'lucide-react'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import UserGreeting from '../components/dashboard/UserGreeting'
 import StatsCard from '../components/dashboard/StatsCard'
@@ -12,7 +12,8 @@ import RecentSkillGapReports from '../components/dashboard/RecentSkillGapReports
 import { useAuth } from '../hooks/useAuth'
 import { getCareerProfile } from '../services/careerProfileService'
 import { getChatHistory } from '../services/chatHistoryService'
-import { getSavedRoadmaps, getSavedComparisons } from '../services/roadmapService'
+import { getSavedRoadmaps } from '../services/roadmapService'
+import { getReports as getSkillGapReports } from '../services/skillGapService'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -20,7 +21,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     conversations: 0,
     roadmaps: 0,
-    comparisons: 0,
+    skillGapReports: 0,
     lastActive: 'No activity yet',
   })
   const [recentTitles, setRecentTitles] = useState([])
@@ -33,16 +34,16 @@ export default function Dashboard() {
     async function fetchDashboardStats() {
       setLoadingStats(true)
       // Fetch all in parallel for performance
-      const [convResult, roadmapResult, compResult, profileResult] = await Promise.all([
+      const [convResult, roadmapResult, skillGapResult, profileResult] = await Promise.all([
         getChatHistory(user.id, 100),
         getSavedRoadmaps(user.id),
-        getSavedComparisons(user.id),
+        getSkillGapReports(user.id),
         getCareerProfile(user.id)
       ])
 
       const conversations = convResult.data || []
       const roadmaps = roadmapResult.data || []
-      const comparisons = compResult.data || []
+      const skillGapReports = skillGapResult.data || []
       setCareerProfile(profileResult.data || null)
 
       // Determine last active date from most recent conversation
@@ -59,7 +60,7 @@ export default function Dashboard() {
       setStats({
         conversations: conversations.length,
         roadmaps: roadmaps.length,
-        comparisons: comparisons.length,
+        skillGapReports: skillGapReports.length,
         lastActive,
       })
 
@@ -87,10 +88,10 @@ export default function Dashboard() {
       trend: 'up',
     },
     {
-      title: 'Saved Comparisons',
-      value: loadingStats ? '—' : String(stats.comparisons),
-      description: stats.comparisons === 0 ? 'Compare degrees to get started' : 'Degree comparisons saved',
-      icon: GitCompareArrows,
+      title: 'Skill Gap Reports',
+      value: loadingStats ? '—' : String(stats.skillGapReports),
+      description: stats.skillGapReports === 0 ? 'Run your first analysis' : 'Analyses saved',
+      icon: BrainCircuit,
       trend: 'up',
     },
     {

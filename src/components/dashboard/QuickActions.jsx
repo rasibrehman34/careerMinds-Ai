@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MessageSquare, History, Bookmark, BarChart2, User } from 'lucide-react'
+import { MessageSquare, History, Bookmark, BrainCircuit, User } from 'lucide-react'
 
 const actions = [
   {
@@ -24,10 +24,10 @@ const actions = [
     color: 'bg-blue-500',
   },
   {
-    name: 'Saved Comparisons',
-    description: 'Review your saved degree comparisons.',
-    href: '/saved-comparisons',
-    icon: BarChart2,
+    name: 'Skill Gap Analysis',
+    description: 'Find skills you need to reach your goals.',
+    href: '/skill-gap',
+    icon: BrainCircuit,
     color: 'bg-amber-500',
   },
   {
