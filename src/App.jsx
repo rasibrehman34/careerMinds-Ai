@@ -28,7 +28,7 @@ function AppContent() {
   const isChatPage = location.pathname === '/chat' || location.pathname.startsWith('/chat/')
   const isAuthPage = isAuthRoute(location.pathname)
   const isProtected = isProtectedRoute(location.pathname)
-  console.log(location, '========>>>>>>')
+  // console.log(location, '========>>>>>>')
   return (
     <div className={`flex min-h-screen flex-col bg-stone-50 text-zinc-900 transition-colors dark:bg-zinc-950 dark:text-zinc-100 ${isProtected ? 'h-screen overflow-hidden' : ''}`}>
       {!isAuthPage && !isProtected && !isChatPage && <Header />}

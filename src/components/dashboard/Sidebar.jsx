@@ -8,19 +8,15 @@ import {
   User,
   Settings,
   LogOut,
-  Menu,
   X,
 } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { signOut } = useAuth()
 
-  async function handleLogout() {
-    await signOut()
-    navigate('/', { replace: true })
+  function handleLogout() {
+    navigate('/signout', { replace: true })
   }
 
   const navItems = [

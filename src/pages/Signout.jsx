@@ -1,23 +1,35 @@
 import { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import AuthLoadingScreen from '../components/auth/AuthLoadingScreen'
 import { DEFAULT_LOGOUT_REDIRECT } from '../utils/protectedRoute'
 
 export default function Signout() {
   const { signOut } = useAuth()
-  const [done, setDone] = useState(false)
+  const navigate = useNavigate()
   const [error, setError] = useState('')
 
   useEffect(() => {
-    signOut().then(({ error: signOutError }) => {
+    let cancelled = false
+
+    async function logout() {
+      const { error: signOutError } = await signOut()
+      if (cancelled) return
+
       if (signOutError) {
         setError(signOutError.message)
         return
       }
-      setDone(true)
-    })
-  }, [signOut])
+
+      navigate(DEFAULT_LOGOUT_REDIRECT, { replace: true })
+    }
+
+    logout()
+
+    return () => {
+      cancelled = true
+    }
+  }, [signOut, navigate])
 
   if (error) {
     return (
@@ -25,10 +37,6 @@ export default function Signout() {
         {error}
       </div>
     )
-  }
-
-  if (done) {
-    return <Navigate to={DEFAULT_LOGOUT_REDIRECT} replace />
   }
 
   return <AuthLoadingScreen message="Signing out..." />
