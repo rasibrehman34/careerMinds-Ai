@@ -29,6 +29,21 @@ export default function ProfileCard() {
             bio: data.bio || '',
           })
           setAvatarPreview(data.avatar_url || '')
+        } else {
+          const metadata = user.user_metadata || {}
+          const fallbackName = metadata.full_name || metadata.name || user.email?.split('@')[0] || ''
+          const fallbackAvatar = metadata.avatar_url || metadata.picture || ''
+
+          setFormData({
+            full_name: fallbackName,
+            avatar_url: fallbackAvatar,
+            bio: '',
+          })
+          setAvatarPreview(fallbackAvatar)
+        }
+
+        if (error) {
+          console.error('Failed to load profile:', error)
         }
         setLoading(false)
       }

@@ -12,7 +12,7 @@ export async function getProfile(userId) {
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single()
+    .maybeSingle()
 
   return { data, error }
 }
@@ -28,11 +28,14 @@ export async function updateProfile(userId, updates) {
 
   const { data, error } = await supabase
     .from('profiles')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', userId)
+    .upsert(
+      {
+        id: userId,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' },
+    )
     .select()
     .single()
 

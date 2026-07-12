@@ -3,6 +3,12 @@
  * Handles all communication with the Google Gemini API.
  */
 
+import {
+  buildLanguagePromptHint,
+  detectConversationLanguage,
+  isDetailRequested,
+} from '../utils/languageDetection'
+
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY?.trim();
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 /**
@@ -163,6 +169,17 @@ export const isRoadmapRequest = (text) => {
     'path to become',
     'steps to become',
     'guide to become',
+    'roadmap chahiye',
+    'rasta batao',
+    'raasta batao',
+    'banne ke liye',
+    'kaise banun',
+    'kaise banaun',
+    'seekhna shuru',
+    'guide chahiye',
+    'poora roadmap',
+    'pura roadmap',
+    'complete roadmap',
   ];
   return triggers.some((t) => lower.includes(t));
 };
@@ -189,9 +206,33 @@ export const isComparisonRequest = (text) => {
     'after fsc',
     'after matric',
     'after intermediate',
+    'compare karo',
+    'farq kya',
+    'konsa behtar',
+    'kaun sa behtar',
+    'kaunsa behtar',
+    'difference kya',
+    'kya behtar hai',
   ].some((t) => lower.includes(t));
   return hasVsOrOr || hasCompareTrigger;
 };
+
+const BILINGUAL_RULES = `
+BILINGUAL COMMUNICATION (CRITICAL — AI CONVERSATION ONLY):
+- Automatically detect whether the user is writing in English or Roman Urdu.
+- ALWAYS reply in the SAME language the user used.
+- If the message is primarily English → respond in English.
+- If the message is primarily Roman Urdu → respond in natural, conversational Roman Urdu.
+- If the message mixes both languages → use the dominant language while keeping technical terms in English.
+- Roman Urdu style: sound like a friendly Pakistani career mentor. Use natural words like Ap, Agar, Kyun, Lekin, Isliye, Seekhna, Samajhna, Karna, Shuru, Mazboot, Tajweez, Mashwara.
+- Do NOT use Urdu script (Arabic/Persian letters). Write Roman Urdu only.
+- Do NOT use machine-translated, overly formal, or awkward literal Urdu.
+- NEVER translate technical terms unnecessarily. Keep these in English: React, Node.js, MongoDB, API, Authentication, Frontend, Backend, Database, JavaScript, TypeScript, Git, GitHub, Express, MERN, etc.
+- Be concise and to-the-point by DEFAULT. Do NOT write unnecessarily long answers.
+- ONLY provide detailed, long, or step-by-step responses when the user explicitly asks (e.g. "detail se batao", "explain in detail", "step by step samjhao", "complete roadmap do", "MERN roadmap samjhao").
+- Personality: friendly, professional, encouraging career mentor. Be helpful, simple, actionable, and beginner-friendly.
+- Avoid: robotic tone, excessive emojis, long introductions, repeating information.
+- Clarifying questions and profile proposals must also be in the user's language.`;
 
 /**
  * Sends a career-related question to Gemini.
@@ -202,6 +243,9 @@ export const isComparisonRequest = (text) => {
 export const sendCareerQuestion = async (question, context = '', userProfile = null) => {
   const isRoadmap = isRoadmapRequest(question);
   const isComparison = !isRoadmap && isComparisonRequest(question);
+  const languageInfo = detectConversationLanguage(question);
+  const wantsDetail = isDetailRequested(question);
+  const languageHint = buildLanguagePromptHint(languageInfo, wantsDetail);
 
   let systemInstruction;
 
@@ -213,6 +257,9 @@ CLARIFICATION RULES (CRITICAL):
   * Example User: "Which programming language should I learn?" -> AI: "What is your goal: Web Development, Mobile Development, AI, Data Science, Cybersecurity, or Game Development?"
   * Example User: "I want to work remotely." -> AI: "Which field are you interested in: Software Development, UI/UX Design, Digital Marketing, Content Writing, or another profession?"
   * Example User: "I want a roadmap." -> AI: "What career would you like the roadmap for?"
+  * Example User (Roman Urdu): "Mujhe konsi degree leni chahiye?" -> AI: "Apka career goal kya hai: Software Engineering, AI, Cyber Security, Data Science, ya koi aur field?"
+  * Example User (Roman Urdu): "Mujhe roadmap chahiye." -> AI: "Kis career ke liye roadmap chahiye?"
+- Clarifying questions must be in the SAME language as the user's message.
 - DO NOT use robotic phrases like "I require more context" or "Your query is ambiguous." Use natural language.
 - If the user provides enough info (e.g., "I want to become a React Developer" or "Compare BSCS and Software Engineering"), answer IMMEDIATELY without asking questions.
 - If you ask a clarifying question, ONLY output the question. Do NOT output any other structured sections, headings, or markdown tables.
@@ -236,6 +283,7 @@ AI PROFILE ASSISTANT (CRITICAL):
 - Instead, output a special markdown block asking for their permission to save it to their profile.
 - You MUST use this exact format on a new line at the end of your response:
   [PROFILE_PROPOSAL]{"field": "current_learning", "value": "React", "message": "I noticed you're learning React. Would you like me to add it to your Career Profile?"}[/PROFILE_PROPOSAL]
+- The "message" field inside the JSON must be in the SAME language as the user's message (English or Roman Urdu).
 - Valid fields are: "education", "career_goal", "current_skills", "interests", "preferred_work", "current_learning".`;
 
   if (isRoadmap) {
@@ -263,6 +311,7 @@ RULES:
 - Be encouraging and practical.
 - DO NOT invent fake statistics.
 - Mention when salaries or market conditions vary by country.
+${BILINGUAL_RULES}
 ${clarificationRules}
 ${memoryRules}
 ${profileRules}`;
@@ -291,6 +340,7 @@ RULES:
 - DO NOT invent fake statistics.
 - Mention when salaries or market conditions vary by country or region.
 - End with a clear, actionable Final Recommendation.
+${BILINGUAL_RULES}
 ${clarificationRules}
 ${memoryRules}
 ${profileRules}`;
@@ -309,14 +359,15 @@ If the user asks a simple or direct question (e.g., "What is React?", "Is BSCS b
 - Avoid unnecessary explanations. If a short answer completely answers the question, stop there. Do not add unnecessary sections.
 
 2. DETAILED ANSWER:
-ONLY if the user explicitly asks for guidance, planning, comparison, or uses phrases like "Explain in detail", "Guide me", "Create a roadmap", "Compare", "Step by step", "Teach me", or "How can I become...":
+ONLY if the user explicitly asks for guidance, planning, comparison, or uses phrases like "Explain in detail", "Guide me", "Create a roadmap", "Compare", "Step by step", "Teach me", "How can I become...", "detail se batao", "step by step samjhao", "thora detail me samjhao", "complete roadmap do", or "samjhao":
 - Provide a detailed, structured response.
 - Use headings and bullet points.
 - Include only relevant sections and avoid filler text.
 
 FOLLOW-UP FRIENDLY:
 If a concise answer is given, end naturally with a short follow-up suggestion when appropriate.
-Example: "If you'd like, I can also provide a detailed roadmap or explanation."
+Example (English): "If you'd like, I can also provide a detailed roadmap or explanation."
+Example (Roman Urdu): "Agar chahein to main detail me roadmap ya explanation bhi de sakta hoon."
 Do not automatically generate the detailed version. Wait for the user's request.
 
 QUALITY RULES:
@@ -324,6 +375,7 @@ QUALITY RULES:
 - Stay focused on the user's exact question. Answer only what was asked.
 - Explain concepts in beginner-friendly language.
 - DO NOT invent facts or fake statistics.
+${BILINGUAL_RULES}
 ${clarificationRules}
 ${memoryRules}
 ${profileRules}`;
@@ -343,7 +395,7 @@ ${profileRules}`;
     profileContextStr += '\n';
   }
 
-  const prompt = `${profileContextStr}${context ? `Conversation History (for context):\n${context}\n\n` : ''}User Question:\n${question}`;
+  const prompt = `${languageHint}\n\n${profileContextStr}${context ? `Conversation History (for context):\n${context}\n\n` : ''}User Question:\n${question}`;
 
   const result = await callGeminiAPI(prompt, systemInstruction);
 
