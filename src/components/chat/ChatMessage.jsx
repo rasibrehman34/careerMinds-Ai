@@ -54,28 +54,33 @@ export default function ChatMessage({
       aria-label={isUser ? 'Your message' : 'AI message'}
     >
       <div
-        className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-[80%] sm:text-base ${
+        className={`max-w-[90%] rounded-2xl text-sm sm:max-w-[80%] sm:text-base ${
           isUser
-            ? 'rounded-br-md bg-emerald-800 text-white dark:bg-emerald-700'
-            : 'rounded-bl-md border border-stone-200 bg-white text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100'
+            ? 'rounded-br-md bg-emerald-800 px-4 py-3.5 leading-7 text-white dark:bg-emerald-700'
+            : 'rounded-bl-md border border-stone-200 bg-white px-5 py-4 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100'
         }`}
       >
         {isUser ? (
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <p className="whitespace-pre-wrap leading-7">{message.content}</p>
         ) : (
           /* Overflow-x-auto allows tables to scroll horizontally on mobile */
           <div className="overflow-x-auto">
             {displayContent && (
               <div className="prose prose-sm prose-zinc max-w-none dark:prose-invert
                 prose-headings:font-semibold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
-                prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2
-                prose-p:my-1 prose-p:leading-relaxed
-                prose-ul:my-1 prose-ul:pl-4
-                prose-ol:my-1 prose-ol:pl-4
-                prose-li:my-0.5
+                prose-headings:mt-6 prose-headings:mb-3
+                prose-h3:text-base prose-h3:mt-5 prose-h3:mb-2.5
+                prose-p:my-3 prose-p:leading-7
+                [&_p:first-child]:mt-0 [&_p:last-child]:mb-0
+                prose-ul:my-3 prose-ul:space-y-1.5 prose-ul:pl-5
+                prose-ol:my-3 prose-ol:space-y-1.5 prose-ol:pl-5
+                prose-li:my-1 prose-li:leading-7
                 prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100
-                prose-code:rounded prose-code:bg-zinc-100 prose-code:px-1 dark:prose-code:bg-zinc-800
-                prose-table:text-sm
+                prose-code:rounded prose-code:bg-zinc-100 prose-code:px-1.5 prose-code:py-0.5 dark:prose-code:bg-zinc-800
+                prose-pre:my-4
+                prose-blockquote:my-4
+                prose-hr:my-6
+                prose-table:my-4 prose-table:text-sm
                 prose-th:bg-zinc-100 prose-th:px-3 prose-th:py-2 dark:prose-th:bg-zinc-800
                 prose-td:px-3 prose-td:py-2
               ">
@@ -116,7 +121,7 @@ export default function ChatMessage({
 
         {/* Save Button — shown for roadmap AND comparison AI responses */}
         {showSaveAction && (
-          <div className="mt-3 border-t border-stone-200 pt-3 dark:border-zinc-700">
+          <div className="mt-4 border-t border-stone-200 pt-4 dark:border-zinc-700">
             <button
               onClick={handleSave}
               disabled={isSaved}

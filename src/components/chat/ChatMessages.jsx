@@ -18,7 +18,7 @@ export default function ChatMessages({
   return (
     <div
       ref={containerRef}
-      className="flex-1 space-y-4 overflow-y-auto px-4 py-6 sm:px-6"
+      className="flex-1 space-y-5 overflow-y-auto px-4 py-6 sm:space-y-6 sm:px-6"
       role="log"
       aria-live="polite"
       aria-label="Chat messages"
