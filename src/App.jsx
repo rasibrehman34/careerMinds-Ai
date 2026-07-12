@@ -21,17 +21,20 @@ import SavedCareers from './pages/SavedCareers'
 import SavedComparisons from './pages/SavedComparisons'
 import SkillGap from './pages/SkillGap'
 import { isAuthRoute, isProtectedRoute } from './utils/protectedRoute'
+import { useAuth } from './hooks/useAuth'
 
 function AppContent() {
   const location = useLocation()
+  const { user } = useAuth()
 
   const isChatPage = location.pathname === '/chat' || location.pathname.startsWith('/chat/')
   const isAuthPage = isAuthRoute(location.pathname)
   const isProtected = isProtectedRoute(location.pathname)
+  const showPublicHeader = !isAuthPage && !isProtected && (!isChatPage || !user)
   // console.log(location, '========>>>>>>')
   return (
     <div className={`flex min-h-screen flex-col bg-stone-50 text-zinc-900 transition-colors dark:bg-zinc-950 dark:text-zinc-100 ${isProtected ? 'h-screen overflow-hidden' : ''}`}>
-      {!isAuthPage && !isProtected && !isChatPage && <Header />}
+      {showPublicHeader && <Header />}
       <main className={isProtected || isChatPage ? 'flex-1 flex flex-col' : 'flex min-h-0 flex-1 flex-col'}>
         <Routes>
           <Route path="/" element={<Home />} />

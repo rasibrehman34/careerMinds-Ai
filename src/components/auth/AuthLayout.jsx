@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 const features = [
   'AI-powered career guidance',
   'Explore degrees and salaries',
@@ -47,10 +49,19 @@ export default function AuthLayout({ children }) {
       </aside>
 
       <div className="flex flex-1 flex-col justify-center bg-stone-50 px-4 py-10 dark:bg-zinc-950 sm:px-6 lg:px-10 xl:px-16">
-        <p className="mb-6 text-center text-lg font-bold text-zinc-900 dark:text-zinc-100 lg:hidden">
-          Career<span className="text-emerald-800 dark:text-emerald-400">Mind</span> AI
-        </p>
-        <div className="mx-auto w-full max-w-md">{children}</div>
+        <div className="mx-auto w-full max-w-md">
+          <Link
+            to="/"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:text-zinc-400 dark:hover:text-zinc-100 dark:focus:ring-offset-zinc-950"
+          >
+            ← Back to Home
+          </Link>
+
+          <p className="mb-6 text-center text-lg font-bold text-zinc-900 dark:text-zinc-100 lg:hidden">
+            Career<span className="text-emerald-800 dark:text-emerald-400">Mind</span> AI
+          </p>
+          {children}
+        </div>
       </div>
     </div>
   )

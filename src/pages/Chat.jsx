@@ -320,7 +320,21 @@ export default function Chat() {
 
   const chatContent = (
     <section className="flex flex-1 h-full flex-col bg-stone-50 dark:bg-zinc-950">
-      <ChatHeader onNewChat={handleNewChat} />
+      {user ? (
+        <ChatHeader onNewChat={handleNewChat} />
+      ) : hasMessages ? (
+        <div className="border-b border-stone-200 bg-white px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900 sm:px-6">
+          <div className="mx-auto flex max-w-4xl justify-end">
+            <button
+              type="button"
+              onClick={handleNewChat}
+              className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-stone-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              New chat
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {!user && (
         <div className="bg-blue-50 py-2 text-center text-sm font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
