@@ -5,20 +5,23 @@ import { Bookmark, BookmarkCheck } from 'lucide-react'
  * ChatMessage component.
  * Renders user messages as plain text.
  * Renders AI messages as formatted markdown.
- * Shows a Save button for roadmap and comparison AI responses.
+ * Shows a Save button for all AI responses (roadmaps, comparisons, and general advice).
  */
 export default function ChatMessage({
   message,
   onSaveRoadmap,
   onSaveComparison,
+  onSaveResponse,
   onSaveProfile,
   onDismissProfile,
   isSaved = false,
 }) {
   const isUser = message.role === 'user'
+  const isError = !isUser && message.content?.startsWith('Error:')
   const showSaveRoadmap = !isUser && message.isRoadmap && onSaveRoadmap
   const showSaveComparison = !isUser && message.isComparison && onSaveComparison
-  const showSaveAction = showSaveRoadmap || showSaveComparison
+  const showSaveResponse = !isUser && !isError && !showSaveRoadmap && !showSaveComparison && onSaveResponse
+  const showSaveAction = showSaveRoadmap || showSaveComparison || showSaveResponse
 
   // Parse Profile Proposal if it exists
   let displayContent = message.content
@@ -40,9 +43,10 @@ export default function ChatMessage({
   function handleSave() {
     if (showSaveRoadmap) onSaveRoadmap(message)
     else if (showSaveComparison) onSaveComparison(message)
+    else if (showSaveResponse) onSaveResponse(message)
   }
 
-  const saveLabel = message.isComparison ? 'Comparison' : 'Roadmap'
+  const saveLabel = message.isComparison ? 'Comparison' : message.isRoadmap ? 'Roadmap' : 'Response'
 
   return (
     <article

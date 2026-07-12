@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Sidebar from './Sidebar'
 import TopNavbar from './TopNavbar'
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children, noPadding = false }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const toggleSidebar = () => {
@@ -16,8 +16,8 @@ export default function DashboardLayout({ children }) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopNavbar toggleSidebar={toggleSidebar} />
         
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+        <main className={`flex-1 overflow-y-auto overflow-x-hidden ${noPadding ? 'flex flex-col' : ''}`}>
+          <div className={noPadding ? 'flex-1 flex flex-col' : 'mx-auto max-w-7xl p-4 sm:p-6 lg:p-8'}>
             {children}
           </div>
         </main>

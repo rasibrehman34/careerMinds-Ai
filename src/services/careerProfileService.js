@@ -13,9 +13,9 @@ export async function getCareerProfile(userId) {
       .from('career_profiles')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "Results contain 0 rows"
+    if (error) {
       console.error('Error fetching career profile:', error.message)
       return { data: null, error: error.message }
     }

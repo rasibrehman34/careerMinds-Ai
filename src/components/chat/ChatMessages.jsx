@@ -8,10 +8,12 @@ export default function ChatMessages({
   containerRef,
   onSaveRoadmap,
   onSaveComparison,
+  onSaveResponse,
   onSaveProfile,
   onDismissProfile,
   savedRoadmapIds = [],
   savedComparisonIds = [],
+  savedResponseIds = [],
 }) {
   return (
     <div
@@ -27,11 +29,13 @@ export default function ChatMessages({
           message={message}
           onSaveRoadmap={onSaveRoadmap}
           onSaveComparison={onSaveComparison}
+          onSaveResponse={onSaveResponse}
           onSaveProfile={onSaveProfile}
           onDismissProfile={onDismissProfile}
           isSaved={
             savedRoadmapIds.includes(message.id) ||
-            savedComparisonIds.includes(message.id)
+            savedComparisonIds.includes(message.id) ||
+            savedResponseIds.includes(message.id)
           }
         />
       ))}

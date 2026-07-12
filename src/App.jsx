@@ -24,17 +24,19 @@ import { isAuthRoute, isProtectedRoute } from './utils/protectedRoute'
 
 function AppContent() {
   const location = useLocation()
+
   const isChatPage = location.pathname === '/chat' || location.pathname.startsWith('/chat/')
   const isAuthPage = isAuthRoute(location.pathname)
   const isProtected = isProtectedRoute(location.pathname)
-
+  console.log(location, '========>>>>>>')
   return (
     <div className={`flex min-h-screen flex-col bg-stone-50 text-zinc-900 transition-colors dark:bg-zinc-950 dark:text-zinc-100 ${isProtected ? 'h-screen overflow-hidden' : ''}`}>
-      {!isAuthPage && !isProtected && <Header />}
-      <main className={isProtected ? 'h-screen w-full' : 'flex min-h-0 flex-1 flex-col'}>
+      {!isAuthPage && !isProtected && !isChatPage && <Header />}
+      <main className={isProtected || isChatPage ? 'flex-1 flex flex-col' : 'flex min-h-0 flex-1 flex-col'}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          {/* Chat handles its own layout: DashboardLayout for logged-in, plain for guests */}
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:id" element={<Chat />} />
           <Route

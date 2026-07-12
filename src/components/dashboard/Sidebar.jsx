@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   MessageSquare,
@@ -15,7 +15,13 @@ import { useAuth } from '../../hooks/useAuth'
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { signOut } = useAuth()
+
+  async function handleLogout() {
+    await signOut()
+    navigate('/', { replace: true })
+  }
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -99,7 +105,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               )
             })}
             <button
-              onClick={() => signOut()}
+              onClick={handleLogout}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />

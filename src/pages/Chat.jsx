@@ -10,6 +10,7 @@ import { sendCareerQuestion, generateConversationTitle, generateRoadmapTitle, ge
 import { createConversation, addMessage, getMessages } from '../services/chatHistoryService'
 import { saveRoadmap, saveComparison } from '../services/roadmapService'
 import { getCareerProfile, upsertCareerProfile } from '../services/careerProfileService'
+import DashboardLayout from '../components/dashboard/DashboardLayout'
 
 export default function Chat() {
   const { user } = useAuth()
@@ -23,6 +24,7 @@ export default function Chat() {
   const [chatId, setChatId] = useState(id || null)
   const [savedRoadmapIds, setSavedRoadmapIds] = useState([])
   const [savedComparisonIds, setSavedComparisonIds] = useState([])
+  const [savedResponseIds, setSavedResponseIds] = useState([])
   const [saveToast, setSaveToast] = useState(null)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [careerProfile, setCareerProfile] = useState(null)
@@ -224,6 +226,35 @@ export default function Chat() {
     }
   }
 
+  // Handle saving a general AI response to Supabase
+  async function handleSaveResponse(message) {
+    if (!user) {
+      showNotification('Please sign in to save responses.', 'error')
+      return
+    }
+
+    if (savedResponseIds.includes(message.id)) return
+
+    try {
+      const titleSource = message.content.slice(0, 200)
+      const titleResponse = await generateConversationTitle(titleSource)
+      const title = titleResponse.success ? titleResponse.message : 'Saved Career Advice'
+
+      const { error } = await saveRoadmap(user.id, title, message.content)
+      if (error) {
+        console.error('Save response error:', error)
+        showNotification('Failed to save response. Please try again.', 'error')
+        return
+      }
+
+      setSavedResponseIds(prev => [...prev, message.id])
+      showNotification(`"${title}" saved to your Saved Careers!`)
+    } catch (err) {
+      console.error('Unexpected error saving response:', err)
+      showNotification('Something went wrong. Please try again.', 'error')
+    }
+  }
+
   // Handle saving a comparison message to Supabase
   async function handleSaveComparison(message) {
     if (!user) {
@@ -255,6 +286,7 @@ export default function Chat() {
     setShowScrollButton(false)
     setSavedRoadmapIds([])
     setSavedComparisonIds([])
+    setSavedResponseIds([])
     navigate('/chat')
   }
 
@@ -286,8 +318,8 @@ export default function Chat() {
     return () => container.removeEventListener('scroll', handleScroll)
   }, [hasMessages, handleScroll])
 
-  return (
-    <section className="flex min-h-[calc(100dvh-4.5rem)] flex-1 flex-col bg-stone-50 dark:bg-zinc-950">
+  const chatContent = (
+    <section className="flex flex-1 h-full flex-col bg-stone-50 dark:bg-zinc-950">
       <ChatHeader onNewChat={handleNewChat} />
 
       {!user && (
@@ -309,10 +341,12 @@ export default function Chat() {
             messagesEndRef={messagesEndRef}
             onSaveRoadmap={handleSaveRoadmap}
             onSaveComparison={handleSaveComparison}
+            onSaveResponse={handleSaveResponse}
             onSaveProfile={handleSaveProfile}
             onDismissProfile={handleDismissProfile}
             savedRoadmapIds={savedRoadmapIds}
             savedComparisonIds={savedComparisonIds}
+            savedResponseIds={savedResponseIds}
           />
         ) : (
           <EmptyState onSelectQuestion={handleSelectQuestion} />
@@ -347,4 +381,14 @@ export default function Chat() {
       )}
     </section>
   )
+
+  if (user) {
+    return (
+      <DashboardLayout noPadding>
+        {chatContent}
+      </DashboardLayout>
+    )
+  }
+
+  return chatContent
 }

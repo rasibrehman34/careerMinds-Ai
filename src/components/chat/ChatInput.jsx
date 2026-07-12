@@ -37,16 +37,7 @@ export default function ChatInput({ value, onChange, onSend }) {
           className="w-full resize-none rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-emerald-600 dark:focus:ring-emerald-950 sm:text-base"
         />
 
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            disabled
-            title="Attach files (coming soon)"
-            className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-zinc-400 dark:border-zinc-700 dark:text-zinc-600"
-          >
-            Attach
-          </button>
-
+        <div className="flex justify-end">
           <button
             type="submit"
             disabled={!hasText}

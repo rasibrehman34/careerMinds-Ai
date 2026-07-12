@@ -23,7 +23,7 @@ export const PROTECTED_ROUTES = [
 
 export const AUTH_ROUTES = ['/login', '/signup', '/forgot-password']
 
-export const DEFAULT_LOGIN_REDIRECT = '/chat'
+export const DEFAULT_LOGIN_REDIRECT = '/dashboard'
 export const DEFAULT_LOGOUT_REDIRECT = '/'
 
 export function isAuthRoute(pathname) {
