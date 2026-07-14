@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { getProfile, updateProfile, uploadAvatar } from '../../services/profileService'
 import { useAuth } from '../../hooks/useAuth'
+import { useProfile } from '../../context/ProfileContext'
 
 export default function ProfileCard() {
   const { user } = useAuth()
+  const { refreshProfile } = useProfile()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
@@ -93,7 +95,10 @@ export default function ProfileCard() {
       setMessage({ type: 'error', text: 'Failed to update profile.' })
     } else {
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
-      // Auto-hide success message after 3 seconds
+      setAvatarFile(null)
+      setFormData((prev) => ({ ...prev, avatar_url: finalAvatarUrl }))
+      // Refresh the global profile context so TopNavbar/UserGreeting update instantly
+      await refreshProfile()
       setTimeout(() => setMessage({ type: '', text: '' }), 3000)
     }
     setSaving(false)

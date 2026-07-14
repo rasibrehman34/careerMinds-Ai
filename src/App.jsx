@@ -2,6 +2,7 @@ import './App.css'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { ProfileProvider } from './context/ProfileContext'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import PublicRoute from './components/PublicRoute'
@@ -88,7 +89,9 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <AppContent />
+          <ProfileProvider>
+            <AppContent />
+          </ProfileProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

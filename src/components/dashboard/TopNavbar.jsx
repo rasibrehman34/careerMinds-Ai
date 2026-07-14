@@ -1,14 +1,10 @@
 import { Menu } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import ThemeToggle from '../ThemeToggle'
-import { useAuth } from '../../hooks/useAuth'
+import { useProfile } from '../../context/ProfileContext'
 
 export default function TopNavbar({ toggleSidebar }) {
-  const { user } = useAuth()
-
-  // Try to get a display name or avatar from metadata
-  const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture
+  const { fullName, avatarUrl } = useProfile()
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-zinc-200 bg-white/80 px-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80 sm:px-6">

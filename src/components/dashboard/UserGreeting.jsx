@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth'
+import { useProfile } from '../../context/ProfileContext'
 
 // Determine the greeting based on the current hour
 function getGreeting() {
@@ -10,10 +11,9 @@ function getGreeting() {
 
 export default function UserGreeting({ totalConversations = 0, loadingStats = false }) {
   const { user } = useAuth()
+  const { fullName, firstName } = useProfile()
   
   // Extract user details
-  const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'User'
-  const firstName = fullName.split(' ')[0]
   const email = user?.email
   const provider = user?.app_metadata?.provider || 'Email'
   
