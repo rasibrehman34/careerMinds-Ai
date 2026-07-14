@@ -18,18 +18,41 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/
  * @returns {Object} Consistent error response format.
  */
 export const handleGeminiError = (error, type = 'network') => {
-  let message = 'An unexpected error occurred while communicating with the AI.';
+  let message = '⚠️ Something went wrong while connecting to the AI. Please try again in a moment.';
 
   if (type === 'missing_key') {
-    message = 'Gemini API key is missing. Please check your environment variables.';
+    message = '🔑 AI service is not configured. Please contact support.';
+
+  } else if (type === 'rate_limit' || error?.status === 429) {
+    // 429 = per-minute rate limit (temporary)
+    message = '⏳ Your free AI tokens for today have been used up. Please wait a few minutes and try again, or come back tomorrow for a fresh quota.';
+
+  } else if (type === 'quota_exceeded' || error?.status === 403) {
+    // 403 RESOURCE_EXHAUSTED = monthly/daily quota fully exhausted
+    message = '🚫 Your free daily AI tokens are finished. Please try again tomorrow — your quota resets every 24 hours.';
+
   } else if (type === 'timeout') {
-    message = 'The request to Gemini API timed out. Please try again.';
-  } else if (error?.status === 429) {
-    message = 'Rate limit exceeded. Please wait a moment before trying again.';
+    message = '⏱️ The AI is taking too long to respond. Please check your internet connection and try again.';
+
   } else if (type === 'invalid_response') {
-    message = 'Received an invalid or incomplete response from the AI.';
-  } else if (error?.message) {
-    message = error.message;
+    message = '🤖 The AI returned an unexpected response. Please rephrase your question and try again.';
+
+  } else if (type === 'network') {
+    // Check for specific network-related error messages
+    const msg = (error?.message || '').toLowerCase();
+    if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed to fetch')) {
+      message = '📶 No internet connection. Please check your network and try again.';
+    } else if (msg.includes('429') || msg.includes('rate')) {
+      message = '⏳ Your free AI tokens for today have been used up. Please wait a few minutes and try again.';
+    } else if (msg.includes('403') || msg.includes('quota') || msg.includes('resource')) {
+      message = '🚫 Your free daily AI tokens are finished. Please try again tomorrow.';
+    } else if (msg.includes('401') || msg.includes('api key') || msg.includes('invalid')) {
+      message = '🔑 AI service authentication failed. Please contact support.';
+    } else if (msg.includes('500') || msg.includes('502') || msg.includes('503')) {
+      message = '🛠️ The AI service is temporarily down. Please try again in a few minutes.';
+    } else if (error?.message) {
+      message = `⚠️ AI Error: ${error.message}`;
+    }
   }
 
   return {
@@ -39,6 +62,7 @@ export const handleGeminiError = (error, type = 'network') => {
     timestamp: new Date().toISOString()
   };
 };
+
 
 /**
  * Formats a successful response into a consistent structure.
@@ -116,22 +140,42 @@ const callGeminiAPI = async (prompt, systemInstruction = '') => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API Error Response:', errorText);
+      const errorText = await response.text()
+      console.error('Gemini API Error Response:', errorText)
 
       if (response.status === 429) {
-        return handleGeminiError({ status: 429 }, 'rate_limit');
+        return handleGeminiError({ status: 429 }, 'rate_limit')
       }
 
-      let errorMsg = `API Error: ${response.status} ${response.statusText}`;
-      try {
-        const parsed = JSON.parse(errorText);
-        if (parsed.error && parsed.error.message) {
-          errorMsg = `API Error ${response.status}: ${parsed.error.message}`;
-        }
-      } catch (e) { }
+      if (response.status === 403) {
+        // Check if it's a quota/resource exhausted error
+        try {
+          const parsed = JSON.parse(errorText)
+          const reason = parsed?.error?.status || parsed?.error?.message || ''
+          if (reason.includes('RESOURCE_EXHAUSTED') || reason.includes('quota')) {
+            return handleGeminiError({ status: 403 }, 'quota_exceeded')
+          }
+        } catch (e) {}
+        return handleGeminiError({ status: 403 }, 'quota_exceeded')
+      }
 
-      throw new Error(errorMsg);
+      if (response.status === 401) {
+        return handleGeminiError(null, 'missing_key')
+      }
+
+      if (response.status >= 500) {
+        return handleGeminiError({ message: `Server error ${response.status}` }, 'network')
+      }
+
+      let errorMsg = `API Error ${response.status}: ${response.statusText}`
+      try {
+        const parsed = JSON.parse(errorText)
+        if (parsed.error?.message) {
+          errorMsg = `API Error ${response.status}: ${parsed.error.message}`
+        }
+      } catch (e) {}
+
+      throw new Error(errorMsg)
     }
 
     const data = await response.json();
