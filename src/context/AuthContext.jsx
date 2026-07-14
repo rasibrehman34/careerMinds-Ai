@@ -7,6 +7,7 @@ import {
   signInWithGoogle as signInWithGoogleRequest,
   signOut as signOutRequest,
   signUp as signUpRequest,
+  deleteAccount as deleteAccountRequest,
 } from '../services/authService'
 
 export const AuthContext = createContext(null)
@@ -58,6 +59,10 @@ export function AuthProvider({ children }) {
     return resetPasswordRequest(email)
   }, [])
 
+  const deleteAccount = useCallback(async () => {
+    return deleteAccountRequest()
+  }, [])
+
   const value = useMemo(
     () => ({
       user: session?.user ?? null,
@@ -68,8 +73,9 @@ export function AuthProvider({ children }) {
       signOut,
       signInWithGoogle,
       resetPassword,
+      deleteAccount,
     }),
-    [session, loading, signUp, signIn, signOut, signInWithGoogle, resetPassword],
+    [session, loading, signUp, signIn, signOut, signInWithGoogle, resetPassword, deleteAccount],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

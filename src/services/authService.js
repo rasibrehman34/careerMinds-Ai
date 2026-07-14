@@ -108,3 +108,25 @@ export async function getSession() {
 export function onAuthStateChange(callback) {
   return supabase.auth.onAuthStateChange(callback)
 }
+
+/**
+ * Permanently deletes the current user's account.
+ * Calls the `delete_user` Postgres RPC which removes the user from auth.users,
+ * then signs the session out locally.
+ */
+export async function deleteAccount() {
+  const { error: rpcError } = await supabase.rpc('delete_user')
+
+  if (rpcError) {
+    return { error: { ...rpcError, message: getAuthErrorMessage(rpcError) } }
+  }
+
+  // Sign out locally after the account has been removed server-side
+  const { error: signOutError } = await supabase.auth.signOut()
+
+  return {
+    error: signOutError
+      ? { ...signOutError, message: getAuthErrorMessage(signOutError) }
+      : null,
+  }
+}
