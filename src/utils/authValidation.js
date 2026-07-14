@@ -59,3 +59,22 @@ export function validateForgotPassword({ email }) {
 
   return errors
 }
+
+export function validateResetPassword({ password, confirmPassword }) {
+  const errors = {}
+
+  if (!password) {
+    errors.password = 'Password is required.'
+  } else if (password.length < 6) {
+    errors.password = 'Password must be at least 6 characters.'
+  }
+
+  if (!confirmPassword) {
+    errors.confirmPassword = 'Please confirm your password.'
+  } else if (password !== confirmPassword) {
+    errors.confirmPassword = 'Passwords do not match.'
+  }
+
+  return errors
+}
+

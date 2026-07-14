@@ -95,7 +95,7 @@ export async function signInWithGoogle() {
 
 export async function resetPassword(email) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-    redirectTo: `${window.location.origin}/login`,
+    redirectTo: `${window.location.origin}/reset-password`,
   })
 
   return { data, error: error ? { ...error, message: getAuthErrorMessage(error) } : null }
@@ -107,6 +107,16 @@ export async function getSession() {
 
 export function onAuthStateChange(callback) {
   return supabase.auth.onAuthStateChange(callback)
+}
+
+/**
+ * Updates the current user's password. The user must have an active
+ * recovery session (i.e. arrived via the password-reset email link).
+ */
+export async function updatePassword(newPassword) {
+  const { data, error } = await supabase.auth.updateUser({ password: newPassword })
+
+  return { data, error: error ? { ...error, message: getAuthErrorMessage(error) } : null }
 }
 
 /**

@@ -12,6 +12,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import ForgotPassword from './pages/ForgotPassword'
 import Signout from './pages/Signout'
+import ResetPassword from './pages/ResetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
@@ -67,6 +68,7 @@ function AppContent() {
             }
           />
           <Route path="/signout" element={<Signout />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/chat-history" element={<ProtectedRoute><ChatHistory /></ProtectedRoute>} />
           <Route path="/saved-careers" element={<ProtectedRoute><SavedCareers /></ProtectedRoute>} />
