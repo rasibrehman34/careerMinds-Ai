@@ -3,7 +3,7 @@ import { BrainCircuit, Loader, Save, ChevronDown, ChevronUp, AlertCircle, CheckC
 import { useLocation } from 'react-router-dom'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import { useAuth } from '../hooks/useAuth'
-import { generateSkillGapAnalysis } from '../services/geminiService'
+import { generateSkillGapAnalysis } from '../services/AI/AIService'
 import { saveReport, getReports, getReportById, deleteReport } from '../services/skillGapService'
 
 const EDUCATION_OPTIONS = ['', 'High School / Matric', 'Intermediate / FSc', "Bachelor's Degree", "Master's Degree", 'Self-Taught / Bootcamp', 'Other']

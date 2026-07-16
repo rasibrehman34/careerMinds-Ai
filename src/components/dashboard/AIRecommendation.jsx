@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Sparkles, Loader } from 'lucide-react'
-import { generateDashboardRecommendation } from '../../services/geminiService'
+import { generateDashboardRecommendation } from '../../services/AI/AIService'
 
 const CACHE_KEY = 'careermind_dashboard_recommendation'
 const CACHE_DURATION_MS = 60 * 60 * 1000 // 1 hour
