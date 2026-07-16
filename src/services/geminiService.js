@@ -10,7 +10,7 @@ import {
 } from '../utils/languageDetection'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY?.trim();
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 /**
  * Handles errors and returns a consistent response structure.
  * @param {Error|Object} error - The error object or null.
@@ -155,7 +155,7 @@ const callGeminiAPI = async (prompt, systemInstruction = '') => {
           if (reason.includes('RESOURCE_EXHAUSTED') || reason.includes('quota')) {
             return handleGeminiError({ status: 403 }, 'quota_exceeded')
           }
-        } catch (e) {}
+        } catch (e) { }
         return handleGeminiError({ status: 403 }, 'quota_exceeded')
       }
 
@@ -173,7 +173,7 @@ const callGeminiAPI = async (prompt, systemInstruction = '') => {
         if (parsed.error?.message) {
           errorMsg = `API Error ${response.status}: ${parsed.error.message}`
         }
-      } catch (e) {}
+      } catch (e) { }
 
       throw new Error(errorMsg)
     }
