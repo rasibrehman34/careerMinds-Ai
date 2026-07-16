@@ -1,3 +1,72 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand Green Colors mapped dynamically over blue, indigo, and violet */
+  --color-blue-50: #D1FAE5;
+  --color-blue-100: #A7F3D0;
+  --color-blue-200: #6EE7B7;
+  --color-blue-300: #34D399;
+  --color-blue-405: #10B981;
+  --color-blue-400: #10B981;
+  --color-blue-500: #059669;
+  --color-blue-600: #047857;
+  --color-blue-700: #065F46;
+  --color-blue-750: #065F46;
+  --color-blue-800: #064E3B;
+  --color-blue-900: #022C22;
+  --color-blue-950: #022C22;
+
+  --color-indigo-50: #D1FAE5;
+  --color-indigo-100: #A7F3D0;
+  --color-indigo-200: #6EE7B7;
+  --color-indigo-300: #34D399;
+  --color-indigo-400: #10B981;
+  --color-indigo-500: #059669;
+  --color-indigo-600: #047857;
+  --color-indigo-700: #065F46;
+  --color-indigo-800: #064E3B;
+  --color-indigo-900: #022C22;
+  --color-indigo-950: #022C22;
+
+  --color-violet-50: #D1FAE5;
+  --color-violet-100: #A7F3D0;
+  --color-violet-200: #6EE7B7;
+  --color-violet-300: #34D399;
+  --color-violet-400: #10B981;
+  --color-violet-500: #059669;
+  --color-violet-600: #047857;
+  --color-violet-700: #065F46;
+  --color-violet-750: #065F46;
+  --color-violet-800: #064E3B;
+  --color-violet-900: #022C22;
+  --color-violet-950: #022C22;
+
+  --color-emerald-50: #E8FDF5;
+  --color-emerald-100: #D1FAE5;
+  --color-emerald-200: #A7F3D0;
+  --color-emerald-300: #6EE7B7;
+  --color-emerald-400: #10B981;
+  --color-emerald-500: #059669;
+  --color-emerald-600: #047857;
+  --color-emerald-700: #065F46;
+  --color-emerald-800: #064E3B;
+  --color-emerald-900: #022C22;
+  --color-emerald-950: #022C22;
+
+  /* Neutral palette configurations */
+  --color-stone-50: #F8FAF9;
+  --color-stone-100: #F3F4F6;
+  --color-stone-200: #E5E7EB;
+
+  --color-zinc-950: #0F172A;
+  --color-zinc-900: #111827;
+  --color-zinc-800: #1F2937;
+  --color-zinc-700: #334155;
+  --color-zinc-500: #6B7280;
+  --color-zinc-400: #94A3B8;
+  --color-zinc-200: #E5E7EB;
+  --color-zinc-100: #F9FAFB;
+}
+
