@@ -71,6 +71,7 @@
 
   /* Font Families */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -81,22 +82,24 @@
   --text-sm--line-height: 1.6;
   --text-base: 1rem;      /* 16px - Body */
   --text-base--line-height: 1.6;
-  --text-lg: 1.125rem;    /* 18px - Large Text */
+  --text-lg: 1.125rem;    /* 18px - Body Large */
   --text-lg--line-height: 1.5;
-  --text-xl: 1.375rem;    /* 22px - Card Heading */
+  --text-xl: 1.25rem;     /* 20px - Card Title */
   --text-xl--line-height: 1.4;
-  --text-2xl: 1.75rem;    /* 28px - Sub Heading */
+  --text-2xl: 1.5rem;     /* 24px - Sub Heading */
   --text-2xl--line-height: 1.35;
-  --text-3xl: 2.25rem;    /* 36px - Section Heading */
+  --text-3xl: 2rem;       /* 32px - Section Heading */
   --text-3xl--line-height: 1.3;
-  --text-4xl: 3rem;       /* 48px - Hero Heading */
+  --text-4xl: 2.5rem;     /* 40px - Page Heading */
   --text-4xl--line-height: 1.25;
-  --text-5xl: 3.5rem;     /* 56px - Display Hero */
-  --text-5xl--line-height: 1.2;
+  --text-5xl: 3rem;       /* 48px - Hero Heading */
+  --text-5xl--line-height: 1.25;
+  --text-6xl: 3.5rem;     /* 56px - Hero Display */
+  --text-6xl--line-height: 1.2;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
