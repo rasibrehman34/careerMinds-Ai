@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import Button from './Button'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../context/ProfileContext'
 
 const navLinkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${
@@ -19,6 +20,7 @@ const navLinks = [
 
 export default function Header() {
   const { user, loading } = useAuth()
+  const { fullName, avatarUrl } = useProfile()
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -50,9 +52,23 @@ export default function Header() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
-                <span className="hidden max-w-[140px] truncate text-sm text-zinc-500 dark:text-zinc-400 lg:inline">
-                  {user.email}
-                </span>
+                <Link
+                  to="/profile"
+                  title="Go to profile"
+                  className="h-8 w-8 overflow-hidden rounded-full bg-stone-200 ring-2 ring-transparent transition-all hover:ring-emerald-800 dark:bg-zinc-800 dark:hover:ring-emerald-400"
+                >
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={fullName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-stone-600 dark:text-zinc-300">
+                      {fullName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </Link>
                 <Button to="/signout" variant="secondary" size="sm">
                   Sign out
                 </Button>
@@ -67,6 +83,27 @@ export default function Header() {
 
         <div className="flex items-center gap-3 md:hidden">
           <ThemeToggle />
+          
+          {user && (
+            <Link
+              to="/profile"
+              title="Go to profile"
+              className="h-8 w-8 overflow-hidden rounded-full bg-stone-200 ring-2 ring-transparent transition-all hover:ring-emerald-800 dark:bg-zinc-800 dark:hover:ring-emerald-400"
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={fullName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs font-bold text-stone-600 dark:text-zinc-300">
+                  {fullName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </Link>
+          )}
+
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -98,15 +135,26 @@ export default function Header() {
               </li>
             ))}
             {user && (
-              <li>
-                <NavLink
-                  to="/dashboard"
-                  onClick={() => setMenuOpen(false)}
-                  className={navLinkClass}
-                >
-                  Dashboard
-                </NavLink>
-              </li>
+              <>
+                <li>
+                  <NavLink
+                    to="/dashboard"
+                    onClick={() => setMenuOpen(false)}
+                    className={navLinkClass}
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className={navLinkClass}
+                  >
+                    Profile
+                  </NavLink>
+                </li>
+              </>
             )}
             {!loading && (
               <li>
