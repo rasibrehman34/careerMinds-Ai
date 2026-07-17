@@ -7,35 +7,30 @@ const actions = [
     description: 'Get AI-powered career advice.',
     href: '/chat',
     icon: MessageSquare,
-    color: 'bg-indigo-500',
   },
   {
     name: 'Chat History',
     description: 'Review your past conversations.',
     href: '/chat-history',
     icon: History,
-    color: 'bg-emerald-500',
   },
   {
     name: 'Saved Roadmaps',
     description: 'View your saved career roadmaps.',
     href: '/saved-careers',
     icon: Bookmark,
-    color: 'bg-blue-500',
   },
   {
     name: 'Skill Gap Analysis',
     description: 'Find skills you need to reach your goals.',
     href: '/skill-gap',
     icon: BrainCircuit,
-    color: 'bg-amber-500',
   },
   {
     name: 'Edit Profile',
     description: 'Update your personal information.',
     href: '/profile',
     icon: User,
-    color: 'bg-violet-500',
   },
 ]
 
@@ -50,7 +45,7 @@ export default function QuickActions() {
         >
           <div>
             <span
-              className={`inline-flex rounded-lg p-2.5 ring-4 ring-white dark:ring-zinc-900 ${action.color} text-white`}
+              className="inline-flex rounded-lg p-2.5 ring-4 ring-white dark:ring-zinc-900 bg-blue-600 text-white dark:bg-blue-500"
             >
               <action.icon className="h-5 w-5" aria-hidden="true" />
             </span>

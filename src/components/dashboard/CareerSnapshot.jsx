@@ -47,8 +47,8 @@ export default function CareerSnapshot({ profile, loading }) {
 
         {/* Top Skills */}
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-purple-50 p-2 dark:bg-purple-900/20">
-            <Code2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-900/20">
+            <Code2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Top Skills</p>
@@ -73,8 +73,8 @@ export default function CareerSnapshot({ profile, loading }) {
 
         {/* Currently Learning */}
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-amber-50 p-2 dark:bg-amber-900/20">
-            <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-900/20">
+            <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Learning</p>
