@@ -56,8 +56,8 @@ export default function ChatMessage({
       <div
         className={`max-w-[90%] rounded-2xl text-sm sm:max-w-[80%] sm:text-base ${
           isUser
-            ? 'rounded-br-md bg-emerald-800 px-4 py-3.5 leading-7 text-white dark:bg-emerald-700'
-            : 'rounded-bl-md border border-stone-200 bg-white px-5 py-4 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100'
+            ? 'rounded-br-md bg-emerald-800 px-4 py-3.5 leading-7 text-white dark:bg-emerald-700 font-medium'
+            : 'rounded-bl-md border border-stone-200 bg-white px-5 py-4 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 font-normal'
         }`}
       >
         {isUser ? (
@@ -67,7 +67,7 @@ export default function ChatMessage({
           <div className="overflow-x-auto">
             {displayContent && (
               <div className="prose prose-sm prose-zinc max-w-none dark:prose-invert
-                prose-headings:font-semibold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
+                prose-headings:font-heading prose-headings:font-semibold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
                 prose-headings:mt-6 prose-headings:mb-3
                 prose-h3:text-base prose-h3:mt-5 prose-h3:mb-2.5
                 prose-p:my-3 prose-p:leading-7
